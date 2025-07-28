@@ -63,17 +63,24 @@ end
 local function toggle_agent_window(agent_index, agent)
   local session = sessions[agent_index]
 
-  -- If the window is already visible, hide it.
+  -- If the agent window is open
   if session and session.win and vim.api.nvim_win_is_valid(session.win) then
-    if config.window_style == 'side' then
-      session.width = vim.api.nvim_win_get_width(session.win)
+    local current_win = vim.api.nvim_get_current_win()
+    if session.win == current_win then
+      -- Case 1: Window is open and is the current one, so close it.
+      if config.window_style == 'side' then
+        session.width = vim.api.nvim_win_get_width(session.win)
+      end
+      vim.api.nvim_win_close(session.win, false)
+      session.win = nil
+    else
+      -- Case 2: Window is open but not the current one, so focus it.
+      vim.api.nvim_set_current_win(session.win)
     end
-    vim.api.nvim_win_close(session.win, false)
-    session.win = nil
     return
   end
 
-  -- If the buffer exists but the window is hidden, show it again.
+  -- Case 3: If the buffer exists but the window is hidden, show it again.
   if session and session.buf and vim.api.nvim_buf_is_valid(session.buf) then
     open_window(session)
     return
