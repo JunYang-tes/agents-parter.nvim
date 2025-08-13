@@ -125,11 +125,9 @@ local function toggle_agent_window(agent_index, agent)
 
   if agent.program == 'gemini' then
     if not gemini_server.running then
-      print("start server")
       gemini_server.start()
     end
     if gemini_server.running then
-      print("great")
       local cwd = vim.fn.getcwd()
       envs.GEMINI_CLI_IDE_SERVER_PORT = gemini_server.port
       envs.TERM_PROGRAM = "vscode"
@@ -137,8 +135,6 @@ local function toggle_agent_window(agent_index, agent)
       table.insert(cmd_to_run, '--ide-mode-feature')
     end
   end
-  print(vim.inspect(cmd_to_run))
-  print(vim.inspect(envs))
 
   vim.fn.jobstart(cmd_to_run, {
     term = true,

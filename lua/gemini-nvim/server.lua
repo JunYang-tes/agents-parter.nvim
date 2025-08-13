@@ -39,7 +39,6 @@ function M.start()
       M.port = -1
     end
   })
-  print("job_id", M.job_id)
 
   if M.job_id > 0 then
     M.running = true
