@@ -1,12 +1,12 @@
 >**NOTE**
 >
->It is recommended to use this plugin along with [neovim-gemini-companion](https://github.com/JunYang-tes/neovim-gemini-companion).
+>It is recommended to use this plugin along with [neovim-ide-companion](https://github.com/JunYang-tes/neovim-ide-companion).
 >```bash
->bun i -g neovim-gemini-companion
+>bun i -g neovim-ide-companion
 >```
 >If you are using npm
 >```bash
->npm i -g neovim-gemini-companion 
+>npm i -g neovim-ide-companion 
 ># Installing globally with npm may require root privileges.
 >sudo npm i -g neovim-gemini-companion 
 >```
