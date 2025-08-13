@@ -18,16 +18,36 @@ function M.check()
     local version_str = vim.fn.system('node --version')
     local major_version = tonumber(string.match(version_str, "v(%d+)"))
     if major_version then
-      if major_version >= 20 then
-        vim.health.ok("Node.js version is " .. version_str:gsub('\n', '') .. " (>= 20).")
+      if major_version >= 22 then
+        vim.health.ok("Node.js version is " .. version_str:gsub('\n', '') .. " (>= 22).")
       else
-        vim.health.warn("Node.js version is " .. version_str:gsub('\n', '') .. ". Version 20 or higher is recommended.")
+        vim.health.warn("Node.js version is " .. version_str:gsub('\n', '') .. ". Version 22 or higher is recommended.")
       end
     else
       vim.health.warn("Could not parse Node.js version string: " .. version_str:gsub('\n', ''))
     end
   else
     vim.health.error("`node` executable not found. Node.js is required.")
+  end
+
+  -- Check for 'neovim-ide-port' executable
+  if vim.fn.executable('neovim-ide-port') == 1 then
+    vim.health.ok("`neovim-ide-port` executable is found in PATH.")
+  else
+    vim.health.error("`neovim-ide-port` executable not found.", {
+      "Please install neovim-gemini-companion.",
+      "See https://github.com/JunYang-tes/neovim-gemini-companion for installation instructions."
+    })
+  end
+
+  -- Check for 'neovim-ide-companion' executable
+  if vim.fn.executable('neovim-ide-companion') == 1 then
+    vim.health.ok("`neovim-ide-companion` executable is found in PATH.")
+  else
+    vim.health.error("`neovim-ide-companion` executable not found.", {
+      "Please install neovim-gemini-companion.",
+      "See https://github.com/JunYang-tes/neovim-gemini-companion for installation instructions."
+    })
   end
 end
 

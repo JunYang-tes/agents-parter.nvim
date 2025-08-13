@@ -1,3 +1,4 @@
+local gemini_server = require('gemini-nvim.server')
 local M = {}
 
 ---@class GeminiNvimConfig
@@ -107,23 +108,41 @@ local function toggle_agent_window(agent_index, agent)
 
   vim.api.nvim_create_autocmd("BufEnter", {
     buffer = session.buf,
-    callback = function ()
+    callback = function()
       vim.cmd("startinsert")
     end
   })
 
   open_window(session)
 
-  local env_vars = ""
-  if agent.envs then
-    for k, v in pairs(agent.envs) do
-      env_vars = env_vars .. string.format("%s='%s' ", k, v)
+  local envs = vim.tbl_extend('force', agent.envs or {}, {
+    NVIM_LISTEN_ADDRESS = server_addr
+  })
+
+  local cmd_to_run = {
+    agent.program,
+  }
+
+  if agent.program == 'gemini' then
+    if not gemini_server.running then
+      print("start server")
+      gemini_server.start()
+    end
+    if gemini_server.running then
+      print("great")
+      local cwd = vim.fn.getcwd()
+      envs.GEMINI_CLI_IDE_SERVER_PORT = gemini_server.port
+      envs.TERM_PROGRAM = "vscode"
+      envs.GEMINI_CLI_IDE_WORKSPACE_PATH = cwd
+      table.insert(cmd_to_run, '--ide-mode-feature')
     end
   end
+  print(vim.inspect(cmd_to_run))
+  print(vim.inspect(envs))
 
-  local cmd_to_run = string.format("%sNVIM_LISTEN_ADDRESS='%s' %s", env_vars, server_addr, agent.program)
   vim.fn.jobstart(cmd_to_run, {
     term = true,
+    env = envs,
     on_exit = function()
       -- Clean up the session state if the process terminates.
       sessions[agent_index] = nil
@@ -139,7 +158,7 @@ function M.setup(user_config)
       {
         name = 'Gemini',
         program = 'gemini',
-        toggle_keymap = user_config.toggle_keymap or '<F3>'
+        toggle_keymap = user_config.toggle_keymap or '<F3>',
       }
     }
   end

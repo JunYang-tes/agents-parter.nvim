@@ -1,17 +1,15 @@
 >**NOTE**
 >
->If you want to use the current Neovim instance when editing diffs, please install this: [Gemini fork](https://github.com/JunYang-tes/gemini-cli.nvim) ([npm](https://www.npmjs.com/package/gemini-cli-neovim)) instead of official [Google Gemini CLI](https://github.com/google/gemini-cli)
+>It is recommended to use this plugin along with [neovim-gemini-companion](https://github.com/JunYang-tes/neovim-gemini-companion).
 >```bash
->bun i -g gemini-cli-neovim
+>bun i -g neovim-gemini-companion
 >```
 >If you are using npm
 >```bash
->npm i -g gemini-cli-neovim
+>npm i -g neovim-gemini-companion 
 ># Installing globally with npm may require root privileges.
->sudo npm i -g gemini-cli-neovim
+>sudo npm i -g neovim-gemini-companion 
 >```
-
-**It is recommended to use gemini-cli-neovim, as it integrates better with Neovim.**
 
 
 # gemini.nvim
@@ -33,8 +31,8 @@ An unofficial Neovim plugin to interact with the Google Gemini CLI within a pers
 ## Requirements
 
 - Neovim >= 0.8
-- [Google Gemini CLI](https://github.com/google/gemini-cli) or  [Gemini fork](https://github.com/JunYang-tes/gemini-cli.nvim) ([npm](https://www.npmjs.com/package/gemini-cli-neovim)) installed and available in your `$PATH`.
-- Node.js >= 20
+- [Google Gemini CLI](https://github.com/google/gemini-cli) (>= 0.1.18-nightly.250812.26fe587b)
+- Node.js >= 22
 
 
 
@@ -76,11 +74,18 @@ require('gemini-nvim').setup({
   float_width_ratio = 0.8,
   float_height_ratio = 0.8,
 
-  -- Whether to create the default keymap for toggling the window.
-  set_default_keymap = true,
-
-  -- The keymap to use for toggling the window.
-  toggle_keymap = '<F3>',
+  -- A list of agents to configure.
+  agents = {
+    {
+      -- The name of the agent. This will be used for the user command.
+      -- e.g. :Gemini
+      name = 'Gemini',
+      -- The command to run for the agent.
+      program = 'gemini',
+      -- The keymap to toggle the agent window.
+      toggle_keymap = '<F3>',
+    }
+  }
 })
 ```
 
