@@ -123,7 +123,7 @@ local function toggle_agent_window(agent_index, agent)
     agent.program,
   }
 
-  if agent.program == 'gemini' then
+  if agent.program == 'gemini' or agent.program == 'qwen' then
     if not gemini_server.running then
       gemini_server.start()
     end
@@ -132,7 +132,11 @@ local function toggle_agent_window(agent_index, agent)
       envs.GEMINI_CLI_IDE_SERVER_PORT = gemini_server.port
       envs.TERM_PROGRAM = "vscode"
       envs.GEMINI_CLI_IDE_WORKSPACE_PATH = cwd
-      table.insert(cmd_to_run, '--ide-mode-feature')
+      if agent.program == 'gemini' then
+        table.insert(cmd_to_run, '--ide-mode-feature')
+      else
+        table.insert(cmd_to_run, '--ide-mode')
+      end
     end
   end
 
