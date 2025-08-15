@@ -14,6 +14,8 @@
 
 # gemini.nvim
 
+[![Mentioned in Awesome Gemini CLI](https://awesome.re/mentioned-badge.svg)](https://github.com/Piebald-AI/awesome-gemini-cli)
+
 An unofficial Neovim plugin to interact with the Google Gemini CLI within a persistent terminal window.
 
 [![asciicast](https://asciinema.org/a/qCrA52b4s5lfnjQJRPc3Cnton.svg)](https://asciinema.org/a/qCrA52b4s5lfnjQJRPc3Cnton)
