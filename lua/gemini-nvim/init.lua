@@ -11,6 +11,7 @@ local M = {}
 ---@class Agent
 ---@field name string # The name of the agent.
 ---@field program string # The command to run for the agent.
+---@field params string[] # Extra params for the agent program.
 ---@field envs table # Environment variables to set for the agent.
 ---@field toggle_keymap string # The keymap to toggle the agent window.
 
@@ -122,6 +123,12 @@ local function toggle_agent_window(agent_index, agent)
   local cmd_to_run = {
     agent.program,
   }
+
+  if agent.params then
+    for _, param in ipairs(agent.params) do
+      table.insert(cmd_to_run, param)
+    end
+  end
 
   if agent.program == 'gemini' or agent.program == 'qwen' then
     if not gemini_server.running then
