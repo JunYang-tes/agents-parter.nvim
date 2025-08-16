@@ -132,9 +132,7 @@ local function toggle_agent_window(agent_index, agent)
       envs.GEMINI_CLI_IDE_SERVER_PORT = gemini_server.port
       envs.TERM_PROGRAM = "vscode"
       envs.GEMINI_CLI_IDE_WORKSPACE_PATH = cwd
-      if agent.program == 'gemini' then
-        table.insert(cmd_to_run, '--ide-mode-feature')
-      else
+      if agent.program == 'qwen' then
         table.insert(cmd_to_run, '--ide-mode')
       end
     end

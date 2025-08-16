@@ -31,7 +31,7 @@ An unofficial Neovim plugin to interact with the Google Gemini CLI within a pers
 ## Requirements
 
 - Neovim >= 0.8
-- [Google Gemini CLI](https://github.com/google/gemini-cli) (>= 0.1.18-nightly.250812.26fe587b)
+- [Google Gemini CLI](https://github.com/google/gemini-cli) (>= 0.1.19)
 - Node.js >= 22
 
 
