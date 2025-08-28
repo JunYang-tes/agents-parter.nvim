@@ -45,8 +45,8 @@ function M.check()
     vim.health.ok("`neovim-ide-companion` executable is found in PATH.")
   else
     vim.health.error("`neovim-ide-companion` executable not found.", {
-      "Please install neovim-gemini-companion.",
-      "See https://github.com/JunYang-tes/neovim-gemini-companion for installation instructions."
+      "Please install neovim-ide-companion.",
+      "See https://github.com/JunYang-tes/neovim-ide-companion for installation instructions."
     })
   end
 end
