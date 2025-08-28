@@ -130,17 +130,25 @@ local function toggle_agent_window(agent_index, agent)
     end
   end
 
-  if agent.program == 'gemini' or agent.program == 'qwen' then
+  if agent.program == 'gemini' or agent.program == 'qwen' 
+    or agent.program == 'claude'
+    then
     if not gemini_server.running then
       gemini_server.start()
     end
     if gemini_server.running then
-      local cwd = vim.fn.getcwd()
-      envs.GEMINI_CLI_IDE_SERVER_PORT = gemini_server.port
-      envs.TERM_PROGRAM = "vscode"
-      envs.GEMINI_CLI_IDE_WORKSPACE_PATH = cwd
-      if agent.program == 'qwen' then
-        table.insert(cmd_to_run, '--ide-mode')
+      if agent.program == 'gemini' then
+        local cwd = vim.fn.getcwd()
+        envs.GEMINI_CLI_IDE_SERVER_PORT = gemini_server.port
+        envs.TERM_PROGRAM = "vscode"
+        envs.GEMINI_CLI_IDE_WORKSPACE_PATH = cwd
+        if agent.program == 'qwen' then
+          table.insert(cmd_to_run, '--ide-mode')
+        end
+      elseif agent.program == 'claude' then
+        envs.CLAUDE_CODE_SSE_PORT = gemini_server.port
+        table.insert(cmd_to_run, "--ide")
+        
       end
     end
   end
