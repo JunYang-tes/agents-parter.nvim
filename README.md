@@ -24,7 +24,7 @@ An unofficial Neovim plugin to interact with the Google Gemini CLI within a pers
 
 ## Features
 
-- Run the `gemini` CLI in a terminal session that persists in the background.
+- Run the `gemini` / `claude`  in a terminal session that persists in the background.
 - Toggle the terminal window's visibility with a single command or keymap.
 - Choose between a floating window or a vertical side panel.
 - Highly configurable window geometry and keymaps.
@@ -33,7 +33,7 @@ An unofficial Neovim plugin to interact with the Google Gemini CLI within a pers
 ## Requirements
 
 - Neovim >= 0.8
-- [Google Gemini CLI](https://github.com/google/gemini-cli) (>= 0.1.19)
+- [Google Gemini CLI](https://github.com/google/gemini-cli) (>= 0.1.19) or claude code
 - Node.js >= 22
 
 
@@ -84,6 +84,11 @@ require('gemini-nvim').setup({
       name = 'Gemini',
       -- The command to run for the agent.
       program = 'gemini',
+      -- The environment variables to pass to the program.
+      envs = {},
+      -- The arguments to pass to the program.
+      -- e.g. {'-m','gemini-2.5-pro'}
+      params = {},
       -- The keymap to toggle the agent window.
       toggle_keymap = '<F3>',
     }
