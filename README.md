@@ -45,10 +45,10 @@ Here is an example using `lazy.nvim`. As this plugin is currently part of a mono
 ```lua
 -- lazy.nvim spec
 {
-  'JunYang-tes/gemini-nvim',
+  'JunYang-tes/agents-parter.nvim',
 
   config = function()
-    require('gemini-nvim').setup({
+    require('agents-parter').setup({
       -- Your configuration goes here
     })
   end,
@@ -62,7 +62,7 @@ Call the `setup` function to configure the plugin. Here are all the available op
 ```lua
 -- init.lua
 
-require('gemini-nvim').setup({
+require('agents-parter').setup({
   -- The style of the window to open.
   -- Can be 'float' or 'side'.
   window_style = 'float',
