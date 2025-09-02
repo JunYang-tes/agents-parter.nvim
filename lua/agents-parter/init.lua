@@ -111,6 +111,8 @@ local function toggle_agent_window(agent_index, agent)
     buffer = session.buf,
     callback = function()
       vim.cmd("startinsert")
+      -- Set buffer variable with current timestamp
+      vim.api.nvim_buf_set_var(session.buf, "neovim-ide-companion-ts", tostring(os.time()))
     end
   })
 
