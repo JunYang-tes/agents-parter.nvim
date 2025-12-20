@@ -18,14 +18,23 @@ local STATUS = {
 --- It sets the NVIM_LISTEN_ADDRESS environment variable,
 --- finds an available port using `neovim-ide-port`,
 --- and starts the `neovim-ide-companion` as a background job.
-function M.start()
+---@param force_new_port boolean? whether to force a new port
+function M.start(force_new_port)
   if M.status == STATUS.RUNNING then
     return
   end
 
-  local port_output = vim.fn.system('neovim-ide-port')
-  local port = tonumber(port_output:match("%d+"))
-  if not port then
+  local old_port = M.port
+  local target_port = -1
+
+  if old_port ~= -1 and not force_new_port then
+    target_port = old_port
+  else
+    local port_output = vim.fn.system('neovim-ide-port')
+    target_port = tonumber(port_output:match("%d+"))
+  end
+
+  if not target_port then
     vim.notify("neovim-ide-port not found", vim.log.levels.ERROR)
     M.status = STATUS.CRASHED
     return
@@ -33,7 +42,7 @@ function M.start()
 
   local command = {
     'neovim-ide-companion',
-    '--port=' .. port,
+    '--port=' .. target_port,
   }
 
   M.job_id = vim.fn.jobstart(command, {
@@ -41,22 +50,34 @@ function M.start()
       NVIM_LISTEN_ADDRESS = vim.v.servername,
     },
     on_exit = function(_, exit_code)
-      if M.status == STATUS.RUNNING then
+      -- Check if this is still the active job we are tracking
+      if M.port == target_port then
         if exit_code ~= 0 then
+          if target_port == old_port and old_port ~= -1 then
+            -- Failed with old port, try a new one
+            M.status = STATUS.STOPPED
+            M.job_id = -1
+            M.start(true)
+            return
+          end
           M.status = STATUS.CRASHED
         else
           M.status = STATUS.STOPPED
         end
+        M.job_id = -1
       end
-      M.job_id = -1
-      M.port = -1
     end
   })
 
   if M.job_id > 0 then
     M.status = STATUS.RUNNING
-    M.port = port
-    vim.notify("neovim-ide-companion server started on port " .. port)
+    M.port = target_port
+    if old_port ~= -1 and target_port ~= old_port then
+      vim.notify("neovim-ide-companion server started on NEW port " .. target_port .. ". Please restart your agent program.",
+        vim.log.levels.WARN)
+    else
+      vim.notify("neovim-ide-companion server started on port " .. target_port)
+    end
   else
     M.status = STATUS.CRASHED
     vim.notify("neovim-ide-companion server failed to start", vim.log.levels.ERROR)
@@ -69,7 +90,6 @@ function M.stop()
     M.status = STATUS.STOPPED
     vim.fn.jobstop(M.job_id)
     M.job_id = -1
-    M.port = -1
   end
 end
 
