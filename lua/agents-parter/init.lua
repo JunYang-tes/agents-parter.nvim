@@ -135,10 +135,10 @@ local function toggle_agent_window(agent_index, agent)
   if agent.program == 'gemini' or agent.program == 'qwen' 
     or agent.program == 'claude'
     then
-    if not gemini_server.running then
+    if gemini_server.status ~= 'RUNNING' then
       gemini_server.start()
     end
-    if gemini_server.running then
+    if gemini_server.status == 'RUNNING' then
       if agent.program == 'gemini' then
         local cwd = vim.fn.getcwd()
         envs.GEMINI_CLI_IDE_SERVER_PORT = gemini_server.port
@@ -177,6 +177,13 @@ function M.setup(user_config)
       }
     }
   end
+
+  vim.api.nvim_create_user_command("AgentsParterServerStatus", function()
+    gemini_server.show_status()
+  end, {
+    nargs = 0,
+    desc = 'Show agents parter server status'
+  })
 
   for i, agent in ipairs(config.agents) do
     local command_name = agent.name
