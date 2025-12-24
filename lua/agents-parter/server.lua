@@ -50,6 +50,7 @@ function M.start(force_new_port)
       NVIM_LISTEN_ADDRESS = vim.v.servername,
     },
     on_exit = function(_, exit_code)
+      vim.notify("neovim-ide-companion server exited with code " .. exit_code)
       -- Check if this is still the active job we are tracking
       if M.port == target_port then
         if exit_code ~= 0 then
