@@ -173,6 +173,14 @@ function M.send_to_agent(text)
 
   -- Send text to the terminal job
   vim.api.nvim_chan_send(session.job_id, text .. "\n")
+
+  -- Focus or open the agent window
+  if session.win and vim.api.nvim_win_is_valid(session.win) then
+    vim.api.nvim_set_current_win(session.win)
+  else
+    open_window(session)
+  end
+
   return true
 end
 
