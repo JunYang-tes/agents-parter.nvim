@@ -13,6 +13,7 @@ local M = {}
 ---@field side_position 'left' | 'right' # Position of the side window.
 ---@field float_width_ratio number # Width of the float window as a ratio of the editor width.
 ---@field float_height_ratio number # Height of the float window as a ratio of the editor height.
+---@field prompt_keymap string # The keymap to trigger the prompt window.
 ---@field agents Agent[] # A list of agents to configure.
 
 M.defaults = {
@@ -20,6 +21,7 @@ M.defaults = {
   side_position = 'right', -- 'left' or 'right'
   float_width_ratio = 0.8,
   float_height_ratio = 0.8,
+  prompt_keymap = '<leader>ap',
   agents = {}
 }
 

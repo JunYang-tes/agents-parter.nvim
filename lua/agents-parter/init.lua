@@ -21,12 +21,14 @@ function M.setup(user_config)
     desc = 'Show agents parter server status'
   })
 
-  -- Keymap for visual mode to trigger the prompt
-  vim.keymap.set('v', '<leader>ap', ':AgentsParterPrompt<CR>', {
-    noremap = true,
-    silent = true,
-    desc = 'Prompt Agent with Selection'
-  })
+  -- Keymap to trigger the prompt
+  if config.prompt_keymap then
+    vim.keymap.set('v', config.prompt_keymap, ':AgentsParterPrompt<CR>', {
+      noremap = true,
+      silent = true,
+      desc = 'Ask with Selection'
+    })
+  end
 
   for i, agent in ipairs(config.agents) do
     local command_name = agent.name
