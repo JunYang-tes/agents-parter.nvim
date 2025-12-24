@@ -86,6 +86,7 @@ function M.toggle_agent_window(agent_index, agent)
   sessions[agent_index] = {
     buf = vim.api.nvim_create_buf(false, true),
     win = nil,
+    submit_key = agent.submit_key,
   }
   session = sessions[agent_index]
   vim.bo[session.buf].bufhidden = 'hide'
@@ -171,15 +172,26 @@ function M.send_to_agent(text)
     return false
   end
 
-  -- Send text to the terminal job
-  vim.api.nvim_chan_send(session.job_id, text .. "\n")
-
-  -- Focus or open the agent window
+  -- Focus or open the agent window first
   if session.win and vim.api.nvim_win_is_valid(session.win) then
     vim.api.nvim_set_current_win(session.win)
   else
     open_window(session)
   end
+
+  -- Use schedule to ensure the focus switch and mode change are processed
+  vim.schedule(function()
+    -- Ensure we are in terminal mode (insert mode in terminal buffer)
+    vim.cmd("startinsert")
+    
+    -- Send the actual text content via chan_send to the job's stdin
+    vim.api.nvim_chan_send(session.job_id, text)
+
+    -- Send the submit key via feedkeys with 't' flag
+    local submit_key = session.submit_key or "<CR>"
+    local keys = vim.api.nvim_replace_termcodes(submit_key, true, false, true)
+    vim.api.nvim_feedkeys(keys, 't', false)
+  end)
 
   return true
 end

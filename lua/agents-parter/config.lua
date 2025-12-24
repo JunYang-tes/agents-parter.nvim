@@ -6,6 +6,7 @@ local M = {}
 ---@field params string[] # Extra params for the agent program.
 ---@field envs table # Environment variables to set for the agent.
 ---@field toggle_keymap string # The keymap to toggle the agent window.
+---@field submit_key string? # The key to send to the terminal to submit a message (e.g. "<C-CR>" or "<CR>").
 
 ---@class GeminiNvimConfig
 ---@field window_style 'float' | 'side' # Style of the agent window.
@@ -32,9 +33,17 @@ function M.setup(user_config)
         name = 'Gemini',
         program = 'gemini',
         toggle_keymap = user_config.toggle_keymap or '<F3>',
+        submit_key = '<C-CR>',
       }
     }
   end
+
+  for _, agent in ipairs(M.options.agents) do
+    if not agent.submit_key then
+      agent.submit_key = '<CR>'
+    end
+  end
+
   return M.options
 end
 
