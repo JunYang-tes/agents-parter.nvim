@@ -7,11 +7,25 @@ local M = {}
 function M.setup(user_config)
   local config = config_mod.setup(user_config)
 
+  vim.api.nvim_create_user_command("AgentsParterPrompt", function()
+    agent_mod.handle_prompt_with_selection()
+  end, {
+    range = true,
+    desc = 'Prompt agent with selected text'
+  })
+
   vim.api.nvim_create_user_command("AgentsParterServerStatus", function()
     gemini_server.show_status()
   end, {
     nargs = 0,
     desc = 'Show agents parter server status'
+  })
+
+  -- Keymap for visual mode to trigger the prompt
+  vim.keymap.set('v', '<leader>ap', ':AgentsParterPrompt<CR>', {
+    noremap = true,
+    silent = true,
+    desc = 'Prompt Agent with Selection'
   })
 
   for i, agent in ipairs(config.agents) do

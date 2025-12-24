@@ -4,6 +4,7 @@ local M = {}
 
 -- Holds the state of the running agent sessions, indexed by agent's position in the config table.
 local sessions = {}
+local last_agent_index = nil
 
 -- Defines the configuration for the floating window.
 local function get_float_win_config()
@@ -58,6 +59,7 @@ function M.toggle_agent_window(agent_index, agent)
     else
       -- Case 2: Window is open but not the current one, so focus it.
       vim.api.nvim_set_current_win(session.win)
+      last_agent_index = agent_index
     end
     return
   end
@@ -65,6 +67,7 @@ function M.toggle_agent_window(agent_index, agent)
   -- Case 3: If the buffer exists but the window is hidden, show it again.
   if session and session.buf and vim.api.nvim_buf_is_valid(session.buf) then
     open_window(session)
+    last_agent_index = agent_index
     return
   end
 
@@ -93,12 +96,15 @@ function M.toggle_agent_window(agent_index, agent)
       vim.cmd("startinsert")
       -- Set buffer variable with current timestamp
       vim.api.nvim_buf_set_var(session.buf, "neovim-ide-companion-ts", tostring(os.time()))
+      last_agent_index = agent_index
     end
   })
 
   open_window(session)
+  last_agent_index = agent_index
 
-  local envs = vim.tbl_extend('force', agent.envs or {}, {
+  local envs = vim.tbl_extend('force', agent.envs or {},
+    {
     NVIM_LISTEN_ADDRESS = server_addr
   })
 
@@ -134,14 +140,80 @@ function M.toggle_agent_window(agent_index, agent)
     end
   end
 
-  vim.fn.jobstart(cmd_to_run, {
+  session.job_id = vim.fn.jobstart(cmd_to_run, {
     term = true,
     env = envs,
     on_exit = function()
       -- Clean up the session state if the process terminates.
       sessions[agent_index] = nil
+      if last_agent_index == agent_index then
+        last_agent_index = nil
+      end
     end,
   })
+end
+
+function M.get_last_agent()
+  if last_agent_index and sessions[last_agent_index] then
+    return sessions[last_agent_index]
+  end
+  -- If last_agent_index is not set, find the first available session
+  for _, s in pairs(sessions) do
+    return s
+  end
+  return nil
+end
+
+function M.send_to_agent(text)
+  local session = M.get_last_agent()
+  if not session or not session.job_id then
+    vim.notify("No active agent session found", vim.log.levels.WARN)
+    return false
+  end
+
+  -- Send text to the terminal job
+  vim.api.nvim_chan_send(session.job_id, text .. "\n")
+  return true
+end
+
+function M.handle_prompt_with_selection()
+  local prompt_mod = require('agents-parter.prompt')
+  
+  -- Ensure we have the latest visual marks
+  -- If we are in visual mode, exit it to update '< and '> marks
+  local mode = vim.api.nvim_get_mode().mode
+  if mode:match("[vV\22]") then
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), 'x', true)
+  end
+
+  local _start = vim.api.nvim_buf_get_mark(0, "<")
+  local _end = vim.api.nvim_buf_get_mark(0, ">")
+  
+  local selected_text = ""
+  if _start[1] > 0 and _end[1] > 0 then
+    -- Use pcall because get_text might fail if marks are invalid or buffer changed
+    local ok, lines = pcall(vim.api.nvim_buf_get_text, 0, _start[1] - 1, _start[2], _end[1] - 1, _end[2] + 1, {})
+    if ok then
+      selected_text = table.concat(lines, "\n")
+    end
+  end
+
+  prompt_mod.open_prompt(function(user_input)
+    local final_text = user_input
+    if selected_text ~= "" then
+      final_text = user_input .. "\n\nSelected Context:\n```\n" .. selected_text .. "\n```"
+    end
+    M.send_to_agent(final_text)
+  end)
+end
+
+function M.is_any_agent_window_open()
+  for _, session in pairs(sessions) do
+    if session.win and vim.api.nvim_win_is_valid(session.win) then
+      return true
+    end
+  end
+  return false
 end
 
 return M
