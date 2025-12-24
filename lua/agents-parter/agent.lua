@@ -197,6 +197,11 @@ function M.send_to_agent(text)
 end
 
 function M.handle_prompt_with_selection()
+  local session = M.get_last_agent()
+  if not session or not session.job_id then
+    vim.notify("No active agent session found", vim.log.levels.WARN)
+    return false
+  end
   local prompt_mod = require('agents-parter.prompt')
   
   -- Get current file path relative to CWD
