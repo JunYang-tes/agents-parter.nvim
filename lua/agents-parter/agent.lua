@@ -199,6 +199,14 @@ end
 function M.handle_prompt_with_selection()
   local prompt_mod = require('agents-parter.prompt')
   
+  -- Get current file path relative to CWD
+  local bufnr = vim.api.nvim_get_current_buf()
+  local filepath = vim.api.nvim_buf_get_name(bufnr)
+  local relative_path = ""
+  if filepath ~= "" then
+    relative_path = vim.fn.fnamemodify(filepath, ":.")
+  end
+
   -- Ensure we have the latest visual marks
   -- If we are in visual mode, exit it to update '< and '> marks
   local mode = vim.api.nvim_get_mode().mode
@@ -221,7 +229,11 @@ function M.handle_prompt_with_selection()
   prompt_mod.open_prompt(function(user_input)
     local final_text = user_input
     if selected_text ~= "" then
-      final_text = user_input .. "\n\nSelected Context:\n```\n" .. selected_text .. "\n```"
+      local context_header = "Selected Context"
+      if relative_path ~= "" then
+        context_header = context_header .. " (@" .. relative_path .. ")"
+      end
+      final_text = user_input .. "\n\n" .. context_header .. ":\n```\n" .. selected_text .. "\n```"
     end
     M.send_to_agent(final_text)
   end)

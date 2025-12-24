@@ -1,16 +1,34 @@
 local M = {}--[[ Opens a floating window to get user input--@param callback function(input: string)]]function M.open_prompt(callback)
   local buf = vim.api.nvim_create_buf(false, true)
-  local width = math.floor(vim.o.columns * 0.6)
+  local width = math.floor(vim.o.columns * 0.3)
   local height = 4
+
+  -- Calculate position near cursor, but keep it on screen
+  local screen_row = vim.fn.screenrow()
+  local screen_col = vim.fn.screencol()
+
+  local row = 1
+  local col = 0
+
+  -- If near the bottom, show above cursor
+  if screen_row + height + 2 > vim.o.lines then
+    row = -height - 1
+  end
+
+  -- If near the right edge, shift left
+  if screen_col + width > vim.o.columns then
+    col = vim.o.columns - screen_col - width
+  end
+
   local opts = {
-    relative = "editor",
+    relative = "cursor",
     width = width,
     height = height,
-    row = math.floor((vim.o.lines - height) / 2),
-    col = math.floor((vim.o.columns - width) / 2),
+    row = row,
+    col = col,
     style = "minimal",
     border = "rounded",
-    title = " Prompt for Agent (Ctrl+Enter to submit) ",
+    title = "Ask (Ctrl+Enter to submit) ",
     title_pos = "center",
   }
   local win = vim.api.nvim_open_win(buf, true, opts)
