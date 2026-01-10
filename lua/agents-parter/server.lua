@@ -166,4 +166,10 @@ function M.show_status()
   end, { buffer = buf, silent = true })
 end
 
+vim.api.nvim_create_autocmd('VimLeavePre', {
+  callback = function()
+    M.stop()
+  end,
+})
+
 return M
