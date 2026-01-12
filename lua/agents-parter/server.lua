@@ -14,6 +14,11 @@ local STATUS = {
   CRASHED = "CRASHED",
 }
 
+local ExitCode = {
+  CRASHED = 1,
+  PORT_IN_USE=3
+}
+
 --- Starts the neovim-ide-companion
 --- It sets the NVIM_LISTEN_ADDRESS environment variable,
 --- finds an available port using `neovim-ide-port`,
@@ -52,20 +57,17 @@ function M.start(force_new_port)
     on_exit = function(_, exit_code)
       vim.notify("neovim-ide-companion server exited with code " .. exit_code)
       -- Check if this is still the active job we are tracking
-      if M.port == target_port then
-        if exit_code ~= 0 then
-          if target_port == old_port and old_port ~= -1 then
-            -- Failed with old port, try a new one
-            M.status = STATUS.STOPPED
-            M.job_id = -1
-            M.start(true)
-            return
-          end
-          M.status = STATUS.CRASHED
-        else
-          M.status = STATUS.STOPPED
-        end
+      if exit_code == 0 then
         M.job_id = -1
+        M.status = STATUS.STOPPED
+      elseif exit_code == ExitCode.PORT_IN_USE then
+        M.status = STATUS.STOPPED
+        M.job_id = -1
+        M.start(true)
+      else
+        M.status = STATUS.STOPPED
+        M.job_id = -1
+        M.start()
       end
     end
   })
