@@ -253,4 +253,14 @@ function M.is_any_agent_window_open()
   return false
 end
 
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  callback = function()
+    for _, session in pairs(sessions) do
+      if session.job_id then
+        pcall(vim.fn.jobstop, session.job_id)
+      end
+    end
+  end
+})
+
 return M

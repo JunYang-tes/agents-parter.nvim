@@ -6,6 +6,7 @@ local M = {
   status = "STOPPED",
   job_id = -1,
   port = -1,
+  is_shutting_down = false,
 }
 
 local STATUS = {
@@ -55,6 +56,11 @@ function M.start(force_new_port)
       NVIM_LISTEN_ADDRESS = vim.v.servername,
     },
     on_exit = function(_, exit_code)
+      if M.is_shutting_down then
+        M.job_id = -1
+        M.status = STATUS.STOPPED
+        return
+      end
       vim.notify("neovim-ide-companion server exited with code " .. exit_code)
       -- Check if this is still the active job we are tracking
       if exit_code == 0 then
@@ -170,6 +176,7 @@ end
 
 vim.api.nvim_create_autocmd('VimLeavePre', {
   callback = function()
+    M.is_shutting_down = true
     M.stop()
   end,
 })
