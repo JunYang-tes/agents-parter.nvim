@@ -13,6 +13,18 @@ log.debug("global statuscolumn option:"..vim.go.statuscolumn)
 local augroup = vim.api.nvim_create_augroup("AgentsParter", { clear = true })
 window_mod.setup_global_autocmds(augroup)
 
+local function change_cursor_shape(shape, delay)
+  delay = delay or 10
+  vim.defer_fn(function()
+    if shape == 'bar' then
+      io.stdout:write("\x1b[5 q")
+    elseif shape == 'block' then
+      io.stdout:write("\x1b[0 q")
+    end
+    io.stdout:flush()
+  end, delay)
+end
+
 -- Defines the configuration for the floating window.
 local function get_float_win_config()
   local config = config_mod.options
@@ -115,6 +127,23 @@ function M.toggle_agent_window(agent_index, agent)
 
   window_mod.setup_buffer_autocmds(augroup, session.buf)
 
+  -- it only works with opencode
+  vim.api.nvim_create_autocmd("ModeChanged", {
+    group = augroup,
+    buffer = session.buf,
+    callback = function()
+      local new_mode = vim.v.event.new_mode
+      local old_mode = vim.v.event.old_mode
+      if new_mode == 't' then
+        log.debug("change_cursor_shape to bar")
+        change_cursor_shape('bar',100)
+      elseif old_mode == 't' then
+        log.debug("change_cursor_shape to block")
+        change_cursor_shape('block')
+      end
+    end
+  })
+
   open_window(session)
   last_agent_index = agent_index
 
@@ -197,6 +226,7 @@ function M.send_to_agent(text)
   vim.schedule(function()
     -- Ensure we are in terminal mode (insert mode in terminal buffer)
     vim.cmd("startinsert")
+    change_cursor_shape('bar', 50)
     
     -- Send the actual text content via chan_send to the job's stdin
     vim.api.nvim_chan_send(session.job_id, text)
