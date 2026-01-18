@@ -1,10 +1,12 @@
 local gemini_server = require('agents-parter.server')
 local config_mod = require('agents-parter.config')
 local agent_mod = require('agents-parter.agent')
+local log = require('agents-parter.log')
 local M = {}
 
 -- Public setup function for the plugin.
 function M.setup(user_config)
+  log.info("Setting up agents-parter")
   local config = config_mod.setup(user_config)
 
   vim.api.nvim_create_user_command("AgentsParterPrompt", function()

@@ -1,10 +1,17 @@
 local gemini_server = require('agents-parter.server')
 local config_mod = require('agents-parter.config')
+local log = require('agents-parter.log')
+local window_mod = require('agents-parter.window')
 local M = {}
 
 -- Holds the state of the running agent sessions, indexed by agent's position in the config table.
 local sessions = {}
 local last_agent_index = nil
+
+log.debug("global statuscolumn option:"..vim.go.statuscolumn)
+
+local augroup = vim.api.nvim_create_augroup("AgentsParter", { clear = true })
+window_mod.setup_global_autocmds(augroup)
 
 -- Defines the configuration for the floating window.
 local function get_float_win_config()
@@ -21,6 +28,7 @@ local function get_float_win_config()
     border = "rounded",
   }
 end
+
 
 -- Opens the agent window based on the user's configuration.
 local function open_window(session)
@@ -39,6 +47,8 @@ local function open_window(session)
       vim.api.nvim_win_set_width(session.win, session.width)
     end
   end
+
+  window_mod.apply_win_options(session.win)
 end
 
 -- The main function for the agent command.
@@ -90,8 +100,10 @@ function M.toggle_agent_window(agent_index, agent)
   }
   session = sessions[agent_index]
   vim.bo[session.buf].bufhidden = 'hide'
+  vim.api.nvim_buf_set_var(session.buf, "is_agent_term_buffer", true)
 
   vim.api.nvim_create_autocmd("BufEnter", {
+    group = augroup,
     buffer = session.buf,
     callback = function()
       vim.cmd("startinsert")
@@ -100,6 +112,8 @@ function M.toggle_agent_window(agent_index, agent)
       last_agent_index = agent_index
     end
   })
+
+  window_mod.setup_buffer_autocmds(augroup, session.buf)
 
   open_window(session)
   last_agent_index = agent_index
