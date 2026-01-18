@@ -250,7 +250,13 @@ function M.handle_prompt_with_selection()
     if selected_text ~= "" then
       local context_header = "Selected Context"
       if relative_path ~= "" then
-        context_header = context_header .. " (@" .. relative_path .. ")"
+        local line_info = ""
+        if _start[1] == _end[1] then
+          line_info = "#L" .. _start[1]
+        else
+          line_info = "#L" .. _start[1] .. "-L" .. _end[1]
+        end
+        context_header = context_header .. " (@" .. relative_path .. line_info .. ")"
       end
       final_text = user_input .. "\n\n" .. context_header .. ":\n```\n" .. selected_text .. "\n```"
     end
