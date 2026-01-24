@@ -14,6 +14,7 @@ end
 
 local log = plenary_log.new({
   plugin = "agents-parter",
+  use_console = false,
   level = "debug",
 })
 
