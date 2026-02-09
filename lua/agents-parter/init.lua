@@ -9,6 +9,25 @@ function M.setup(user_config)
   log.info("Setting up agents-parter")
   local config = config_mod.setup(user_config)
 
+  -- Register file reference source for blink.cmp
+  local ok, blink = pcall(require, "blink.cmp")
+  if ok then
+    local provider_ok, err = pcall(function()
+      blink.add_source_provider('file_reference', {
+        name = 'AgentsParterFileReference',
+        module = 'agents-parter.file_reference_source',
+        enabled = true,
+        timeout_ms = 3000,
+        score_offset = 5,
+      })
+      log.info("File reference source registered successfully")
+    end)
+
+    if not provider_ok then
+      log.error("Failed to register file_reference source: " .. tostring(err))
+    end
+  end
+
   vim.api.nvim_create_user_command("AgentsParterPrompt", function()
     agent_mod.handle_prompt_with_selection()
   end, {

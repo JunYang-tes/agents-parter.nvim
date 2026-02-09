@@ -37,6 +37,7 @@ local M = {}--[[ Opens a floating window to get user input--@param callback func
   vim.bo[buf].buftype = "nofile"
   vim.bo[buf].bufhidden = "wipe"
   vim.bo[buf].swapfile = false
+  vim.bo[buf].filetype = "agent_prompt"
 
   -- Map Ctrl+Enter to submit
   -- In some terminals <C-CR> might be <C-Enter> or other codes.
